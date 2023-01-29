@@ -15,40 +15,34 @@ export const App = () => {
   const [showModal, setShowModal] = useState(false);
   const [totalImages, setTotalImages] = useState(0);
   const [largeImage, setLargeImage] = useState('');
-  const [error, setError] = useState('');
-
-  const getImages = async () => {
-    setIsLoading(true);
-
-    try {
-      const response = await fetchImages(query, page);
-
-      const dataImages = response.hits.map(({ id, tags, largeImageURL }) => ({
-        id,
-        tags,
-        largeImageURL,
-      }));
-
-      setImages(prevImages => [...prevImages, ...dataImages]);
-      setTotalImages(prevTotalImages => response.totalHits);
-      setError('');
-
-      if (page !== 1) {
-        scrollOnLoadButton();
-      }
-    } catch (error) {
-      console.log('Something wrong... Try again!');
-      setError({ error });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   useEffect(() => {
     if (!query) return;
-    console.log(query);
-    console.log(page);
-    getImages();
+    setIsLoading(true);
+
+    (async () => {
+      try {
+        const response = await fetchImages(query, page);
+
+        const dataImages = response.hits.map(({ id, tags, largeImageURL }) => ({
+          id,
+          tags,
+          largeImageURL,
+        }));
+
+        setImages(prevImages => [...prevImages, ...dataImages]);
+        setTotalImages(prevTotalImages => response.totalHits);
+
+        if (page !== 1) {
+          scrollOnLoadButton();
+        }
+      } catch (error) {
+        console.log('Something wrong... Try again!');
+        // setError({ error });
+      } finally {
+        setIsLoading(false);
+      }
+    })();
   }, [query, page]);
 
   const onChangeQuery = query => {
